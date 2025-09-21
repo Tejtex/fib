@@ -39,6 +39,9 @@ The binary will be available at:
 # Generate 20 Fibonacci numbers (default a=1, b=1)
 ./fib 20 --list
 
+# Generate 20 Fibonacci numbers (default a=1, b=1) and plot them on a logarithmic scale
+./fib 20 --list --plot
+
 # Generate a custom sequence with initial values -1, 1
 ./fib 20 --init -1,1 --list
 
@@ -47,6 +50,9 @@ The binary will be available at:
 
 # Use 3 previous elements (n-params)
 ./fib 10 --init 1,1,2 --n-params 3 --expr "a b c + +" --list
+
+# Benchmark how many numbers can the generator generate in one second
+./fib 0 --bench 1
 ```
 ## Notes
 - `--expr` uses RPN syntax: operators come after operands.

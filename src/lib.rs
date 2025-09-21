@@ -7,6 +7,7 @@
 
 
 use std::collections::VecDeque;
+use std::time::{Duration, Instant};
 use num_bigint::BigInt;
 
 /// Generates nth number using a given function.
@@ -32,6 +33,24 @@ where
     dp.pop_front().unwrap().clone()
 }
 
+pub fn generate_bench<F>(secs: f32, init: Vec<BigInt>, n_params: usize, func: F)  -> (i64, Duration)
+where
+F: Fn(&VecDeque<BigInt>, usize) -> BigInt,
+{
+    let start = Instant::now();
+    let mut dp: VecDeque<BigInt> = VecDeque::from(init.clone());
+    let mut count = 0;
+    loop {
+        if start.elapsed() >= Duration::from_secs_f32(secs) {
+            return (count, start.elapsed());
+        }
+        let new = func(&dp, n_params);
+        dp.pop_front();
+        dp.push_back(new.clone());
+        count += 1;
+    }
+}
+
 /// Generates a sequence of BigInt numbers using a given function.
 ///
 /// # Arguments
@@ -54,7 +73,7 @@ where
         dp.push_back(new.clone());
         res.push(new);
     }
-    res
+    res.into_iter().take(n as usize).collect()
 }
 
 
@@ -100,7 +119,7 @@ pub fn parse_custom_bigint(expr: String) -> impl Fn(&VecDeque<BigInt>, usize) ->
                 }
                 other => {
                     if other.len() == 1 && other.chars().last().unwrap().is_alphabetic() && other.chars().last().unwrap() as u8 - b'a' < n_params as u8 {
-                        stack.push(dp[(other.chars().last().unwrap() as u8 - b'a') as usize].clone());
+                        stack.push(dp[dp.len() - (other.chars().last().unwrap() as u8 - b'a') as usize - 1].clone());
                     } else if other.parse::<i64>().is_ok() {
                         stack.push(BigInt::from(other.parse::<i64>().unwrap()));
                     } else {
@@ -112,4 +131,20 @@ pub fn parse_custom_bigint(expr: String) -> impl Fn(&VecDeque<BigInt>, usize) ->
 
         stack.pop().unwrap()
     }
+}
+
+pub fn log10_bigint(n: &BigInt) -> f64 {
+    let digits = n.to_string();
+    let len = digits.len();
+
+    let leading: f64 = digits
+        .chars()
+        .take(15)
+        .collect::<String>()
+        .parse()
+        .unwrap_or(1.0);
+
+    let log_leading = leading.abs().log10();
+
+    log_leading + if len > 15 {len - 15} else {0} as f64
 }

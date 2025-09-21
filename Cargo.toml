@@ -6,6 +6,10 @@ edition = "2024"
 [dependencies]
 clap={version="4.5.47", features=["derive"]}
 num-bigint="0.4.6"
+num-traits="0.2.19"
+color-print="0.3.7"
+textplots = "0.8.7"
+
 [dev-dependencies]
 criterion = "0.7.0"
 [[bench]]
