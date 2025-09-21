@@ -2,7 +2,6 @@
 
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange?logo=rust)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Crates.io](https://img.shields.io/crates/v/fib-cli)](https://crates.io/crates/fib-cli)
 
 **Fib** is a fast and flexible command-line tool written in Rust for generating Fibonacci sequences and their variants using **BigInt**. It supports custom functions, arbitrary initial values, and adjustable parameters.
 
