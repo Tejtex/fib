@@ -1,0 +1,13 @@
+[package]
+name = "fib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap={version="4.5.47", features=["derive"]}
+num-bigint="0.4.6"
+[dev-dependencies]
+criterion = "0.7.0"
+[[bench]]
+name = "fib_bench"
+harness = false

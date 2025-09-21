@@ -1,0 +1,51 @@
+---
+import Layout from '../layouts/Layout.astro'; // lub inna ścieżka do Twojego layoutu
+---
+
+<Layout title="Get Started | Fib CLI">
+    <main class="px-6 py-16 max-w-3xl mx-auto text-gray-300 font-mono">
+        <h1 class="text-4xl font-bold text-cyan-400 mb-6">🚀 Get Started</h1>
+
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold text-cyan-300 mb-2">🔧 Installation</h2>
+            <p class="mb-2">Clone the repository and build it with <code>cargo</code>:</p>
+            <pre class="bg-gray-800 text-white p-4 rounded-md overflow-x-auto"><code>git clone https://github.com/Tejtex/fib.git
+cd fib
+cargo build --release</code></pre>
+            <p class="mt-2">The binary will be available at:</p>
+            <pre class="bg-gray-800 text-white p-2 rounded-md overflow-x-auto"><code>target/release/fib</code></pre>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold text-cyan-300 mb-2">▶️ Usage Examples</h2>
+            <p class="mb-2">Here are some examples of how to use <code>fib</code>:</p>
+            <pre class="bg-gray-800 text-white p-4 rounded-md overflow-x-auto"><code># Generate 20th Fibonacci number
+./fib 20
+
+# Generate 20 Fibonacci numbers (default a=1, b=1)
+./fib 20 --list
+
+# Generate a custom sequence with initial values -1, 1
+./fib 20 --init -1,1 --list
+
+# Generate sequence with a custom function (RPN)
+./fib 10 --init 1,1 --expr "a b +" --list
+
+# Use 3 previous elements (n-params)
+./fib 10 --init 1,1,2 --n-params 3 --expr "a b c + +" --list</code></pre>
+        </section>
+
+        <section class="mb-10">
+            <h2 class="text-2xl font-semibold text-cyan-300 mb-2">💡 Notes</h2>
+            <ul class="list-disc list-inside space-y-2 text-gray-400">
+                <li><code>--expr</code> uses Reverse Polish Notation (RPN).</li>
+                <li>Variables: <code>a</code> = last value, <code>b</code> = second-to-last, <code>c</code> = third-to-last, etc.</li>
+                <li><code>--n-params</code> controls how many previous values are used in the expression.</li>
+            </ul>
+        </section>
+
+        <section class="text-sm text-gray-500">
+            <p>Project licensed under MIT. Made with ❤️ in Rust.</p>
+        </section>
+    </main>
+</Layout>
