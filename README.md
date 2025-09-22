@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Fib** is a fast and flexible command-line tool written in Rust for generating Fibonacci sequences and their variants using **BigInt**. It supports custom functions, arbitrary initial values, and adjustable parameters.
+See the [documentation](https://tejtex.github.io/fib) and join our [discord server](https://discord.gg/yhRanS6Z8w)
 
 ---
 
@@ -45,25 +46,25 @@ The binary will be available at:
 # Generate a custom sequence with initial values -1, 1
 ./fib 20 --init -1,1 --list
 
-# Generate sequence with a custom function (RPN)
-./fib 10 --init 1,1 --expr "a b +" --list
+# Generate sequence with custom coefficients
+./fib 10 --init 1,1 --coeffs 1,3 --list
 
 # Use 3 previous elements (n-params)
-./fib 10 --init 1,1,2 --n-params 3 --expr "a b c + +" --list
+./fib 10 --init 1,1,2 --n-params 3 --coeffs 1,1,1 --list
 
-# Benchmark how many numbers can the generator generate in one second
-./fib 0 --bench 1
+# Benchmark the binary
+./fib 1000 --bench
+
+# Show details instead of a giant number
+./fib 10000 --details
+
+# Generate 20th Fibonacci number modulo 10
+./fib 20 --mod-x 10
 ```
 ## Notes
-- `--expr` uses RPN syntax: operators come after operands.
-
-  - Example: `"a b +"` → `a + b`
-
-  - Example: `"a b * c +"` → `a * b + c`
-
-- Variables: a = last value, b = second-to-last, c = third-to-last, etc.
-
-- --n-params controls how many previous values are passed to the custom function.
+- --n-params controls how many previous values are used.
+- --mod-x is applied to each iteration not only to the last one
+- --coeffs controls the coefficients of each param. Example: ./fib 20 --coeffs 1,2 means f(n) = 1 * f(n-1) + 2 * f(n-2)
 
 
 ---
