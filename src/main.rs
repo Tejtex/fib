@@ -8,11 +8,10 @@
 use std::time::Instant;
 use clap::Parser;
 use color_print::cprintln;
-use num_bigint::BigInt;
-use num_prime::nt_funcs::is_prime;
-use num_traits::{Signed, Zero};
+use ibig::IBig;
+use num_traits::{One, Signed, Zero};
 use textplots::{Chart, Plot, Shape};
-use fib::{generate, generate_list, log10_bigint};
+use fib::{generate, generate_list, log10_ibig};
 
 /// A powerful cli for generating sequences, mostly fibonacci
 #[derive(Parser, Debug)]
@@ -23,7 +22,7 @@ struct Fib {
 
     /// First N values of the sequence
     #[arg(short, long, value_delimiter=',', default_value="1,1", allow_hyphen_values = true)]
-    init: Vec<BigInt>,
+    init: Vec<IBig>,
 
     /// Coefficients
     #[arg(short, long, value_delimiter=',', default_value="1,1", allow_hyphen_values = true)]
@@ -81,7 +80,7 @@ fn main() {
                 .enumerate()
                 .map(|(i, n)| {
                     let x = i as f32;
-                    let y = log10_bigint(n) as f32;
+                    let y = log10_ibig(n) as f32;
                     (x, y)
                 })
                 .collect();
@@ -102,17 +101,18 @@ fn main() {
             }
         }
     } else {
-        let res = generate(fib.n, fib.init, fib.n_params, fib.coeffs.as_slice(), fib.mod_x);
+        let res = if fib.n_params == 2 && fib.coeffs[0] == 1 && fib.coeffs[1] == 1 && fib.mod_x == None && fib.init[0] == IBig::one() && fib.init[1] == IBig::one() {
+
+            generate(fib.n, fib.init, fib.n_params, fib.coeffs.as_slice(), fib.mod_x, true)
+        } else {
+            generate(fib.n, fib.init, fib.n_params, fib.coeffs.as_slice(), fib.mod_x, false)
+            
+        };
         let time = start.elapsed();
         if fib.details {
             println!("digits: {:?}", res.to_string().chars().count());
-            println!("bits: {:?}", res.bits());
-            println!("bytes: {:?}", res.to_signed_bytes_be().len());
             println!("sign: {:?}", if res.is_negative() {"-".to_string()} else {"+".to_string()});
-            if res.is_positive() {
-                println!("is prime: {:?}", is_prime(&res.to_biguint().unwrap(), None).probably())
-            }
-            println!("is even: {:?}", &res % 2 == BigInt::zero());
+            println!("is even: {:?}", res % IBig::one() * 2 == IBig::zero());
             if fib.bench {
                 println!("time: {:?}", time);
             }

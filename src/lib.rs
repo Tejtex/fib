@@ -1,14 +1,12 @@
 //! # Fib Library
 //!
 //! This crate provides core functionality for generating Fibonacci sequences
-//! and custom numerical sequences using `BigInt`. It supports arbitrary
+//! and custom numerical sequences using `IBig`. It supports arbitrary
 //! initial values, custom RPN expressions, and configurable number of
 //! previous elements used for calculations.
 
 
-use std::collections::HashMap;
-use std::hash::{DefaultHasher, Hash, Hasher};
-use num_bigint::BigInt;
+use ibig::IBig;
 use num_traits::{One, Zero};
 
 /// Generates nth number using a given function.
@@ -22,13 +20,15 @@ use num_traits::{One, Zero};
 ///
 /// # Returns
 /// A number.
-pub fn generate( n: u128, init: Vec<BigInt>, n_params: usize, coeffs: &[i64], mod_x: Option<u64>) -> BigInt
+pub fn generate( n: u128, init: Vec<IBig>, n_params: usize, coeffs: &[i64], mod_x: Option<u64>, raw_fib: bool) -> IBig
 {
-
+    if raw_fib {
+        return generate_fib(n);
+    }
     let n = n - 1;
     let m = build_matrix(coeffs);
-    let m_pow = mat_pow(m, n, mod_x.map(|e| BigInt::from(e)));
-    let mut result = BigInt::zero();
+    let m_pow = mat_pow(m, n, mod_x.map(|e| IBig::from(e)));
+    let mut result = IBig::zero();
     for i in 0..n_params {
         result += &m_pow[0][i] * &init[n_params - i - 1];
         if let Some(m) = mod_x {
@@ -39,7 +39,27 @@ pub fn generate( n: u128, init: Vec<BigInt>, n_params: usize, coeffs: &[i64], mo
 
 }
 
-/// Generates a sequence of BigInt numbers using a given function.
+fn generate_fib(n: u128) -> IBig {
+    fib_pair(n).0
+}
+
+fn fib_pair(n: u128) -> (IBig, IBig) {
+    if n == 0 {
+        (IBig::zero(), IBig::one())
+    } else {
+        let (a, b) = fib_pair(n / 2);
+        let c = &a * ((&b * 2 * n) - &a);
+        let d = &a * &a + &b * &b;
+        if n % 2 == 0 {
+            (c, d)
+        } else {
+            let sum = c + &d;
+            (d, sum)
+        }
+    }
+}
+
+/// Generates a sequence of IBig numbers using a given function.
 ///
 /// # Arguments
 /// * `n` - Number of elements to generate
@@ -49,14 +69,14 @@ pub fn generate( n: u128, init: Vec<BigInt>, n_params: usize, coeffs: &[i64], mo
 ///
 /// # Returns
 /// A vector containing the generated sequence.
-pub fn generate_list(n: u128, init: Vec<BigInt>, _n_params: usize, coeffs: &[i64], mod_x: Option<u64>) -> Vec<BigInt>
+pub fn generate_list(n: u128, init: Vec<IBig>, _n_params: usize, coeffs: &[i64], mod_x: Option<u64>) -> Vec<IBig>
 {
 
     let k = coeffs.len();
-    let mut seq: Vec<BigInt> = init.clone().into_iter().map(|e| BigInt::from(e)).collect();
+    let mut seq: Vec<IBig> = init.clone().into_iter().map(|e| IBig::from(e)).collect();
 
     for i in k..=n as usize {
-        let mut next = BigInt::zero();
+        let mut next = IBig::zero();
         for j in 0..k {
             next += coeffs[j] * &seq[i - j - 1];
         }
@@ -69,14 +89,14 @@ pub fn generate_list(n: u128, init: Vec<BigInt>, _n_params: usize, coeffs: &[i64
 }
 
 
-/// Log10 of bigint.
+/// Log10 of IBig.
 ///
 /// # Arguments
 /// * `n` - a big int number
 ///
 /// # Returns
 /// log10 of the given number
-pub fn log10_bigint(n: &BigInt) -> f64 {
+pub fn log10_ibig(n: &IBig) -> f64 {
     let digits = n.to_string();
     let len = digits.len();
 
@@ -105,12 +125,12 @@ pub fn log10_bigint(n: &BigInt) -> f64 {
 /// # Notes
 /// - The matrices must be square and of the same size.
 /// - If `mod_x` is `Some(m)`, all multiplications and additions are performed modulo `m`.
-fn mat_mul(a: &Vec<Vec<BigInt>>, b: &Vec<Vec<BigInt>>, mod_x: &Option<BigInt>) -> Vec<Vec<BigInt>> {
+fn mat_mul(a: &Vec<Vec<IBig>>, b: &Vec<Vec<IBig>>, mod_x: &Option<IBig>) -> Vec<Vec<IBig>> {
     let k = a.len();
-    let mut result = vec![vec![BigInt::zero(); k]; k];
+    let mut result = vec![vec![IBig::zero(); k]; k];
     for i in 0..k {
         for j in 0..k {
-            let mut sum = BigInt::zero();
+            let mut sum = IBig::zero();
             for l in 0..k {
                 let mut prod = &a[i][l] * &b[l][j];
                 if let Some(m) = mod_x {
@@ -141,11 +161,11 @@ fn mat_mul(a: &Vec<Vec<BigInt>>, b: &Vec<Vec<BigInt>>, mod_x: &Option<BigInt>) -
 /// - The matrix must be square.
 /// - Uses fast exponentiation by squaring for efficiency.
 /// - If `mod_x` is `Some(m)`, all intermediate operations are performed modulo `m`.
-fn mat_pow(mut base: Vec<Vec<BigInt>>, mut exp: u128, mod_x: Option<BigInt>) -> Vec<Vec<BigInt>> {
+fn mat_pow(mut base: Vec<Vec<IBig>>, mut exp: u128, mod_x: Option<IBig>) -> Vec<Vec<IBig>> {
     let k = base.len();
-    let mut result = vec![vec![BigInt::zero(); k]; k];
+    let mut result = vec![vec![IBig::zero(); k]; k];
     for i in 0..k {
-        result[i][i] = BigInt::one();
+        result[i][i] = IBig::one();
     }
 
     while exp > 0 {
@@ -170,16 +190,16 @@ fn mat_pow(mut base: Vec<Vec<BigInt>>, mut exp: u128, mod_x: Option<BigInt>) -> 
 ///
 /// build_matrix([1, 1]) = [[1, 1]
 ///                         [0, 1]]
-fn build_matrix(coeffs: &[i64]) -> Vec<Vec<BigInt>> {
+fn build_matrix(coeffs: &[i64]) -> Vec<Vec<IBig>> {
     let k = coeffs.len();
-    let mut mat = vec![vec![BigInt::zero(); k]; k];
+    let mut mat = vec![vec![IBig::zero(); k]; k];
 
     for i in 0..k {
-        mat[0][i] = BigInt::from(coeffs[i]);
+        mat[0][i] = IBig::from(coeffs[i]);
     }
 
     for i in 1..k {
-        mat[i][i - 1] = BigInt::one();
+        mat[i][i - 1] = IBig::one();
     }
 
     mat

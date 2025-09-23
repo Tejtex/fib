@@ -5,19 +5,19 @@ edition = "2024"
 
 [dependencies]
 clap={version="4.5.47", features=["derive"]}
-num-bigint= { version="0.4.6", features = ["serde"] }
+ibig="0.3.6"
 num-traits="0.2.19"
 color-print="0.3.7"
 textplots = "0.8.7"
-num-prime= { version = "0.4.4", features=["big-int"] }
-serde = "1.0.226"
-bson = { version="3.0.0", features=["serde"] }
-sha2="0.11.0-rc.2"
-dirs="6.0.0"
-hex="0.4.3"
 
 [dev-dependencies]
 criterion = "0.7.0"
+
 [[bench]]
 name = "fib_bench"
 harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
